@@ -43,6 +43,10 @@ const getConfigFromEnv = () => {
         key: process.env.UPPYSERVER_INSTAGRAM_KEY,
         secret: process.env.UPPYSERVER_INSTAGRAM_SECRET
       },
+      facebook: {
+        key: process.env.UPPYSERVER_FACEBOOK_KEY,
+        secret: process.env.UPPYSERVER_FACEBOOK_SECRET
+      },
       s3: {
         key: process.env.UPPYSERVER_AWS_KEY,
         secret: process.env.UPPYSERVER_AWS_SECRET,
