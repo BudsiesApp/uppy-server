@@ -14,6 +14,14 @@ module.exports = () => {
     },
     instagram: {
       callback: '/instagram/callback'
-    }
+    },
+    facebook: {
+      authorize_url: "https://graph.facebook.com/oauth/authorize",
+      access_url: "https://graph.facebook.com/oauth/access_token",
+      callback: '/facebook/callback',
+      scope: [
+          'user_photos'
+      ],
+    },
   }
 }

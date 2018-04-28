@@ -13,8 +13,11 @@ RUN apk --update add  --virtual native-dep \
   apk del native-dep
 RUN apk add bash
 COPY . /app
+
+RUN mkdir storage && chmod -R 777 storage
+
+RUN npm install -g nodemon
 RUN npm run build
 CMD ["node","/app/lib/standalone/start-server.js"]
 # This can be overwritten later
 EXPOSE 3020
-
