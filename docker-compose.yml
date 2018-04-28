@@ -30,4 +30,4 @@ services:
 networks:
   reverseproxy:
       external:
-          name: webdevelopmentreverseproxy_default
+          name: reverseproxy_default
