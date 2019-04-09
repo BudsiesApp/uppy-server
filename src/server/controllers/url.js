@@ -2,9 +2,9 @@ const router = require('express').Router
 const request = require('request')
 const Uploader = require('../Uploader')
 const validator = require('validator')
-const utils = require('../utils')
+const utils = require('../helpers/utils')
 const logger = require('../logger')
-const redis = require('redis')
+const redis = require('../redis')
 
 module.exports = () => {
   return router()
@@ -47,7 +47,7 @@ const get = (req, res) => {
   utils.getURLMeta(req.body.url)
     .then(({ size }) => {
       // @ts-ignore
-      const { filePath, redisUrl } = req.uppy.options
+      const { filePath } = req.uppy.options
       req.uppy.debugLog('Instantiating uploader.')
       const uploader = new Uploader({
         uppyOptions: req.uppy.options,
@@ -57,7 +57,8 @@ const get = (req, res) => {
         metadata: req.body.metadata,
         size: size,
         pathPrefix: `${filePath}`,
-        storage: redisUrl ? redis.createClient({ url: redisUrl }) : null
+        storage: redis.client(),
+        headers: req.body.headers
       })
 
       req.uppy.debugLog('Waiting for socket connection before beginning remote download.')

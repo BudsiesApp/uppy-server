@@ -1,12 +1,11 @@
 /**
- * oAuth callback.  Encripts the access token and sends the new token with the response,
+ * oAuth callback.  Encrypts the access token and sends the new token with the response,
  * and redirects to redirect url.
  */
-// @ts-ignore
-const atob = require('atob')
-const tokenService = require('../token-service')
+const tokenService = require('../helpers/jwt')
 const parseUrl = require('url').parse
-const { hasMatch } = require('../utils')
+const { hasMatch } = require('../helpers/utils')
+const oAuthState = require('../helpers/oauth-state')
 
 /**
  *
@@ -21,21 +20,31 @@ module.exports = function callback (req, res, next) {
     req.uppy.providerTokens = {}
   }
 
+  // TODO see if the access_token can be transported in a different way that url query params
   req.uppy.providerTokens[providerName] = req.query.access_token
   req.uppy.debugLog(`Generating auth token for provider ${providerName}.`)
   const uppyAuthToken = tokenService.generateToken(req.uppy.providerTokens, req.uppy.options.secret)
-  // add the token to the response
-  tokenService.setToken(res, uppyAuthToken, req.uppy.options)
+  // add the token to cookies for thumbnail/image requests
+  tokenService.addToCookies(res, uppyAuthToken, req.uppy.options)
 
-  if (req.session.grant.state) {
-    const redirectUrl = JSON.parse(atob(req.session.grant.state)).redirect
+  if ((req.session.grant || {}).state) {
+    const origin = oAuthState.getFromState(req.session.grant.state, 'origin', req.uppy.options.secret)
     const allowedClients = req.uppy.options.clients
-    const urlObj = parseUrl(redirectUrl)
-    const urlWithProtocol = `${urlObj.protocol}//${urlObj.host}`
-    // if no clients then allow any client
-    if (!req.uppy.options.clients || hasMatch(urlWithProtocol, allowedClients) || hasMatch(urlObj.host, allowedClients)) {
-      res.redirect(redirectUrl)
-      return
+    // if no preset clients then allow any client
+    if (!allowedClients || hasMatch(origin, allowedClients) || hasMatch(parseUrl(origin).host, allowedClients)) {
+      return res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8" />
+            <script>
+              window.opener.postMessage({token: "${uppyAuthToken}"}, "${origin}")
+              window.close()
+            </script>
+        </head>
+        <body></body>
+        </html>`
+      )
     }
   }
   next()
