@@ -1,9 +1,10 @@
-FROM alpine:3.6
+FROM alpine:3.8
 
 RUN apk add --update nodejs \
 	           nodejs-npm 
 
 COPY package.json /app/package.json
+COPY package-lock.json /app/package-lock.json
 
 WORKDIR /app
 
@@ -16,7 +17,6 @@ COPY . /app
 
 RUN mkdir storage && chmod -R 777 storage
 
-RUN npm install -g nodemon
 RUN npm run build
 CMD ["node","/app/lib/standalone/start-server.js"]
 # This can be overwritten later
