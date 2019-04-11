@@ -1,9 +1,10 @@
-FROM alpine:3.6
+FROM alpine:3.8
 
 RUN apk add --update nodejs \
 	           nodejs-npm 
 
 COPY package.json /app/package.json
+COPY package-lock.json /app/package-lock.json
 
 WORKDIR /app
 
