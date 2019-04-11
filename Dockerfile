@@ -16,7 +16,6 @@ COPY . /app
 
 RUN mkdir storage && chmod -R 777 storage
 
-RUN npm install -g nodemon
 RUN npm run build
 CMD ["node","/app/lib/standalone/start-server.js"]
 # This can be overwritten later
